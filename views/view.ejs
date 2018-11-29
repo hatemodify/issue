@@ -15,7 +15,7 @@
         <input type="text" name="name" placeholder="이름" id="inpName">
         <input type="password" name="password" placeholder="비밀번호" id="inpPassword">
         <textarea name="content" placeholder="내용" id="inpCont"></textarea>
-        <button type="submit" class="btn_save">등록</button>
+        <input type="submit" class="btn_save">등록</input>
       </form>
       <ul class="list_reply">
         <%if (board.reply) { %>
@@ -45,6 +45,8 @@
         alert('이름을 입력하세요');
       }else{
         replyForm.submit();
+        alert('등록되었습니다.');
+
       }
     }
     btnSave.addEventListener('click' , chkForm); 

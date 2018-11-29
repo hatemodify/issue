@@ -2,10 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const BoardSchema = new Schema({
-  index:{
-    type:Number,
-    index:true,
-  },
+
   author: {
     type: String,
     default: '관리자'
@@ -13,7 +10,7 @@ const BoardSchema = new Schema({
   tit: {
     type: String,
     unique: true,
-    index:true,
+    index: true
   },
   cont: {
     type: String
@@ -25,13 +22,11 @@ const BoardSchema = new Schema({
   reply: []
 });
 
-BoardSchema.virtual("createdDate").get(function () {
+BoardSchema.virtual('createdDate').get(function() {
   return getDate(this.createdAt);
 });
 
-
-
-function getDate (dateObj){
+function getDate(dateObj) {
   if (dateObj instanceof Date)
     return (
       dateObj.getFullYear() +
@@ -40,12 +35,11 @@ function getDate (dateObj){
       '-' +
       get2digits(dateObj.getDate())
     );
-};
-
-function get2digits(num){
-  return ("0" + num).slice(-2);
 }
 
+function get2digits(num) {
+  return ('0' + num).slice(-2);
+}
 
 const Board = mongoose.model('board', BoardSchema);
 module.exports = Board;

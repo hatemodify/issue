@@ -5,7 +5,7 @@ const http = require('http');
 const methodOverride = require('method-override');
 const request = require('request');
 const schedule = require('node-schedule');
-
+const puppeteer = require('puppeteer');
 const Board = require('./models/board');
 const Reply = require('./models/reply');
 const mongoose = require('mongoose');
@@ -79,8 +79,8 @@ app.post('/view/:id', (req, res) => {
         reply: replyCont
       }
     },
-    success => {
-      console.log('success');
+    success => {      
+      res.redirect(req.get('referer'));
     }
   );
 });
@@ -92,8 +92,47 @@ schedule.scheduleJob('*/1 * * * *', () => {
     title :'.tit_view',
     content:'.news_view'
   }
-  
-  console.log(date);
 
-  util.crwal(opts);
+  crwal(opts);
 });
+
+
+const crwal = async opts => {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
+  let tempArr = [];
+  let tempObj = {};
+  await page.goto(opts.url);
+  await page.waitForSelector(opts.link);
+  const stories = await page.$$eval(opts.link, anchors => {
+    return anchors.map(anchor => anchor.href).slice(0, 10);
+  });
+
+  for (let storyLink of stories) {
+    await page.goto(storyLink);
+    const tit = await page.$eval(opts.title, element => {
+      return element.innerHTML;
+    });
+
+    const cont = await page.$eval(opts.content, element => {
+      return element.innerHTML;
+    });
+    tempObj.tit = tit;
+    tempObj.cont = cont;
+    tempArr.push(tempObj);
+
+    writeBoard(tit, cont);
+  }
+
+  await browser.close();
+};
+
+const writeBoard = (tit, cont) => {
+  Board.find({ tit: tit }, (err, board, result) => {
+    const new_contents = new Board({ tit, cont });
+    new_contents.save(err => {
+      err ? console.log(err) : console.log('success');
+    });
+  });
+};
